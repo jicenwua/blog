@@ -1,0 +1,10 @@
+# 项目排除路径
+/xcz-blog/xcz-blog-article/target/
+/xcz-blog/xcz-blog-user/target/
+/xcz-blog/xcz-common-cache/target/
+/xcz-blog/xcz-common-core/target/
+/xcz-blog/xcz-common-datasource/target/
+/xcz-blog/xcz-common-id/target/
+/xcz-blog/xcz-common-rocketMq/target/
+/xcz-blog/xcz-common-security/target/
+/xcz-blog/xcz-gateway/target/

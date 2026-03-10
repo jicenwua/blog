@@ -1,0 +1,7 @@
+## JWT配置
+#security:
+#  jwt:
+#    # JWT密钥，至少64个字符，生产环境请使用更复杂的密钥
+#    secret: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz123456
+#    # 过期时间（毫秒），默认2小时
+#    expiration: 7200000

@@ -1,0 +1,47 @@
+# Tomcat
+server:
+  port: 8082
+
+# Spring 配置
+spring:
+  application:
+    name: blog-article
+  profiles:
+    active: @profiles.active@
+  #连接 nacos 配置中心${spring.application.name}-${spring.application.active}.yaml
+  config:
+    import: "nacos:${spring.application.name}-${spring.profiles.active}.yaml"
+
+  # ⭐ 添加文件上传配置
+  servlet:
+    multipart:
+      enabled: true                    # 启用文件上传
+      max-file-size: 10MB             # 单个文件最大大小
+      max-request-size: 20MB          # 整个请求最大大小
+      file-size-threshold: 0          # 文件写入磁盘的阈值
+      resolve-lazily: false           # 是否延迟解析
+
+  cloud:
+    nacos:
+      #连接服务中心
+      discovery:
+        server-addr: 127.0.0.1:8848   # 注册中心地址
+        username: nacos               # 如果开启了鉴权
+        password: nacos
+        #连接配置中心
+      config:
+        server-addr: 127.0.0.1:8848   # 配置中心地址
+        file-extension: yaml          # 配置文件扩展名，支持 properties/yaml/yml
+        namespace: public             # 命名空间 ID（默认 public，可以改成自己创建的）
+        group: BLOG_GROUP          # 分组，默认 DEFAULT_GROUP
+        username: nacos               # 如果开启了鉴权
+        password: nacos
+
+
+
+
+# 图片访问基础路径配置
+image:
+  base-url: http://localhost:8080
+  # 网关路由前缀
+  gateway-route-prefix: /xcz/blog

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="xcz-gateway" />
+        <module name="xcz-common-rocketMq" />
+        <module name="xcz-blog-user" />
+        <module name="xcz-blog-article" />
+        <module name="xcz-common-security" />
+        <module name="xcz-common-core" />
+        <module name="xcz-common-id" />
+        <module name="xcz-common-cache" />
+        <module name="xcz-common-datasource" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="xcz-blog" options="-parameters -parameters" />
+      <module name="xcz-blog-article" options="-parameters -parameters" />
+      <module name="xcz-blog-user" options="-parameters -parameters" />
+      <module name="xcz-common-cache" options="-parameters -parameters" />
+      <module name="xcz-common-core" options="-parameters -parameters" />
+      <module name="xcz-common-datasource" options="-parameters -parameters" />
+      <module name="xcz-common-id" options="-parameters -parameters" />
+      <module name="xcz-common-rocketMq" options="-parameters -parameters" />
+      <module name="xcz-common-security" options="-parameters -parameters" />
+      <module name="xcz-gateway" options="-parameters -parameters" />
+    </option>
+  </component>
+</project>

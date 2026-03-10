@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # --- Redis ---
+  redis-server:
+    image: redis:latest
+    container_name: redis-server
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass 594088
+    volumes:
+      - "E:/Code/docker/redis/data:/data"
+    networks:
+      - app-network
+
+  # --- MongoDB ---
+  mongodb-xcz:
+    image: mongo:latest
+    container_name: mongodb-xcz
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - "E:/Code/docker/mongo/db:/data/db"
+    networks:
+      - app-network
+
+  # --- Elasticsearch ---
+  es:
+    image: elasticsearch:9.2.2
+    container_name: es
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - "E:/Code/docker/es/data:/usr/share/elasticsearch/data"
+    networks:
+      - app-network
+
+  # --- Nacos ---
+  nacos-mysql:
+    image: nacos/nacos-server:latest
+    container_name: nacos-mysql
+    restart: always
+    environment:
+      - MODE=standalone
+    ports:
+      - "18080:8080"
+      - "9848:9848"
+    volumes:
+      - "E:/Code/docker/nacos/logs:/home/nacos/logs"
+      - "E:/Code/docker/nacos/conf:/home/nacos/conf"
+    networks:
+      - app-network
+
+  # --- RocketMQ NameServer ---
+  rmqnamesrv:
+    image: apache/rocketmq:5.3.0
+    container_name: rmqnamesrv
+    restart: always
+    ports:
+      - "9876:9876"
+    volumes:
+      - "E:/Code/docker/rocketmq/namesrv/logs:/home/rocketmq/logs"
+    command: sh mqnamesrv
+    networks:
+      - app-network
+
+  # --- RocketMQ Broker ---
+  rmqbroker:
+    image: apache/rocketmq:5.3.0
+    container_name: rmqbroker
+    restart: always
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+    environment:
+      - NAMESRV_ADDR=rmqnamesrv:9876
+    volumes:
+      - "E:/Code/docker/rocketmq/broker/logs:/home/rocketmq/logs"
+      - "E:/Code/docker/rocketmq/broker/store:/home/rocketmq/store"
+      # 如果你有自定义broker.conf，可以取消下面注释
+      # - "E:/Code/docker/rocketmq/broker/conf/broker.conf:/home/rocketmq/conf/broker.conf"
+    command: sh mqbroker -n rmqnamesrv:9876
+    depends_on:
+      - rmqnamesrv
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

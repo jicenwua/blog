@@ -1,0 +1,96 @@
+#spring:
+#  # 数据源配置 (Dynamic Datasource + Druid)
+#  datasource:
+#    # 1. 动态数据源核心配置
+#    dynamic:
+#      # 设置默认主数据源名称
+#      primary: master
+#      # 严格模式，false表示未匹配到数据源时使用默认数据源
+#      strict: false
+#      # 开启 P6Spy SQL分析（可选，开发环境建议开启，生产建议关闭）
+#      p6spy: false
+#
+#      # 具体数据源列表
+#      datasource:
+#        # 主库
+#        master:
+#          url: jdbc:mysql://127.0.0.1/database?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+#          username: root
+#          password: 123456
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#        # 从库 (未启用时可注释掉或保留结构)
+#        slave:
+#          url:
+#          username:
+#          password:
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#      # 2. Druid 连接池全局配置 (对 master 和 slave 都生效)
+#      druid:
+#        # 初始连接数
+#        initial-size: 5
+#        # 最小连接池数量
+#        min-idle: 10
+#        # 最大连接池数量
+#        max-active: 20
+#        # 获取连接等待超时时间 (毫秒)
+#        max-wait: 60000
+#        # 连接超时时间
+#        connect-timeout: 30000
+#        # 网络超时时间
+#        socket-timeout: 60000
+#        # 间隔多久才进行一次检测，检测需要关闭的空闲连接 (毫秒)
+#        time-between-eviction-runs-millis: 60000
+#        # 连接在池中最小生存的时间 (毫秒)
+#        min-evictable-idle-time-millis: 300000
+#        # 连接在池中最大生存的时间 (毫秒)
+#        max-evictable-idle-time-millis: 900000
+#        # 检测连接是否有效的SQL
+#        validation-query: SELECT 1 FROM DUAL
+#        # 申请连接的时候检测
+#        test-while-idle: true
+#        # 申请连接时执行validationQuery检测 (降低性能，建议false)
+#        test-on-borrow: false
+#        # 归还连接时执行validationQuery检测 (降低性能，建议false)
+#        test-on-return: false
+#        # 配置过滤器 (统计stat, 防火墙wall)
+#        filters: stat,wall
+#        # 3. Wall 过滤器配置 (允许批量执行SQL)
+#        wall:
+#          config:
+#            multi-statement-allow: true
+#
+#
+#    # 注意：这部分配置是独立于 dynamic 的，用于开启 http://localhost:port/druid 页面
+#    druid:
+#      stat-view-servlet:
+#        enabled: true
+#        url-pattern: /druid/*
+#        reset-enable: false
+#        login-username: root
+#        login-password: ztkj123456
+#        # allow: 127.0.0.1 # 白名单
+#        # deny: # 黑名单
+#      web-stat-filter:
+#        enabled: true
+#        url-pattern: /*
+#        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+#      filter:
+#        stat:
+#          # 开启慢SQL记录
+#          log-slow-sql: true
+#          slow-sql-millis: 3000
+#          merge-sql: true
+#
+## MyBatis 配置
+#mybatis:
+#  # 搜索指定包别名 (通常指向实体类 Entity/Domain 包，而不是 Mapper 接口包)
+#  # 建议修改为实体类路径，例如 com.wkjx.**.domain
+#  typeAliasesPackage: com.xcz.**.domain
+#  # 配置mapper的扫描，找到所有的mapper.xml映射文件
+#  mapperLocations: classpath*:mapper/**/*Mapper.xml
+#  configuration:
+#    # 开启驼峰命名转换
+#    map-underscore-to-camel-case: true
+#    # 打印SQL日志 (生产环境建议关闭)
+#    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

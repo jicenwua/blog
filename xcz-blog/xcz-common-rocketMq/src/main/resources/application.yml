@@ -1,0 +1,9 @@
+rocketmq:
+  name-server: 127.0.0.1:9876 # RocketMQ Nameserver 地址
+  producer:
+    group: blog-article-producer # 生产者组名
+    send-message-timeout: 3000 # 发送超时时间
+    retry-times-when-send-failed: 2 # 失败重试次数
+    max-message-size: 4194304 # 最大消息大小 4MB
+  consumer:
+    group: blog-article-consumer # 默认消费者组名

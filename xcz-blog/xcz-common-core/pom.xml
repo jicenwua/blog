@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.xcz</groupId>
+        <artifactId>xcz-blog</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>xcz-common-core</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>xcz-common-core</name>
+
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+    </properties>
+
+
+    <dependencies>
+        <!-- IP2Region: 用于 IP 地址解析和地理位置查询的库，支持离线查询（无需网络），常用于日志分析、反作弊、区域限制等场景 -->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>ip2region</artifactId>
+            <version>3.3.4</version>
+        </dependency>
+
+        <!-- UserAgentUtils: 用于解析 HTTP User-Agent 字符串，提取浏览器、操作系统、设备类型等信息，常用于日志记录、设备适配或统计分析 -->
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+            <version>1.21</version>
+        </dependency>
+
+        <!-- SpringCloud Openfeign: Spring Cloud 的 Feign 客户端启动器，用于声明式 REST 客户端调用，支持负载均衡、熔断等微服务特性。常用于服务间通信 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+
+        <!-- SpringCloud Loadbalancer: Spring Cloud 的负载均衡启动器，提供客户端负载均衡（如 Ribbon 的替代品），常与 OpenFeign 或 RestTemplate 结合使用，支持服务发现。 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
+        <!-- Spring Context Support: Spring 上下文支持模块，提供额外的上下文功能，如缓存抽象（EhCache 支持）、调度任务等。常用于扩展 Spring Core 的应用上下文。 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Transmittable ThreadLocal: Alibaba 的 TTL 库，用于在线程池/异步任务中传递 ThreadLocal 值（如 MDC 日志上下文、Trace ID），常用于分布式追踪和日志一致性。 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+        </dependency>
+
+        <!-- Pagehelper: MyBatis 分页插件的 Spring Boot 启动器，提供自动分页、计数优化等功能。常用于数据库查询分页场景。如果你的项目用 MyBatis，这是高效分页工具。 -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Hibernate Validator: Spring Boot 的校验启动器，提供 JSR-380 Bean Validation 支持（如 @NotNull、@Valid），常用于表单/参数校验。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Jackson Databind: Jackson 的核心数据绑定模块，用于 JSON 序列化/反序列化。Spring Boot 默认使用 Jackson，这是其核心组件，常用于 REST API 的 JSON 处理。 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Alibaba Fastjson: Fastjson2 是阿里巴巴的 JSON 库，提供高性能 JSON 处理，支持序列化/反序列化。常作为 Jackson 的替代品，用于需要更快 JSON 操作的场景。注意：Fastjson2 是 Fastjson1 的升级版，安全性更好。 -->
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+        </dependency>
+
+        <!-- Jwt (API): JSON Web Token 的 API 接口，用于生成/验证 JWT 令牌，常用于认证/授权（如 OAuth、API 安全）。 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+
+        <!-- Jwt (Impl): JWT 的实现模块，提供核心算法支持（运行时依赖）。常与 jjwt-api 结合使用。 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Jwt (Jackson): JWT 的 Jackson 集成模块，用于 JSON 处理（运行时依赖）。常用于将 JWT 与 Jackson 序列化结合。 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Apache Lang3: 提供字符串、日期、对象等实用工具类（如 StringUtils、DateUtils），常用于简化 Java 核心操作。 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <!-- Commons Io: Apache Commons IO 库，提供文件/流操作工具（如 FileUtils、IOUtils），常用于文件读写、复制等 I/O 任务。 -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <!-- Commons Fileupload: 文件上传库，提供文件上传处理（如 Multipart 支持），常用于 Web 表单文件上传。 -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+        </dependency>
+
+        <!-- POI OOXML: Apache POI 的 OOXML 模块，用于读写 Excel 文件（.xlsx），常用于报表生成、数据导入/导出。 -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+
+
+        <!-- Lombok: 项目 Lombok，提供编译期注解（如 @Data、@Getter），用于减少 boilerplate 代码（如 getters/setters）。这是开发工具依赖，常用于实体类简化。 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- Orika Core: Orika 对象映射库，提供 Bean 到 Bean 的映射（如 DTO 转换），常用于层间数据转换。作为 MapStruct 或 Dozer 的替代品。 -->
+        <dependency>
+            <groupId>ma.glasnost.orika</groupId>
+            <artifactId>orika-core</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Starter Test: Spring Boot 的测试启动器，提供 JUnit、Mockito 等测试框架支持（测试 scope）。常用于单元/集成测试。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

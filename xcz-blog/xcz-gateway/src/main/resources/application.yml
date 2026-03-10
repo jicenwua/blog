@@ -1,0 +1,29 @@
+# Tomcat
+server:
+  port: 8080
+
+# Spring配置
+spring:
+  application:
+    name: blog-gateway-server
+  profiles:
+    active: @profiles.active@
+  #连接nacos配置中心${spring.application.name}-${spring.application.active}.yaml
+  config:
+    import: "nacos:${spring.application.name}-${spring.profiles.active}.yaml"
+
+  cloud:
+    nacos:
+      #连接服务中心
+      discovery:
+        server-addr: 127.0.0.1:8848   # 注册中心地址
+        username: nacos               # 如果开启了鉴权
+        password: nacos
+        #连接配置中心
+      config:
+        server-addr: 127.0.0.1:8848   # 配置中心地址
+        file-extension: yaml          # 配置文件扩展名，支持 properties/yaml/yml
+        namespace: public             # 命名空间ID（默认 public，可以改成自己创建的）
+        group: BLOG_GROUP          # 分组，默认 DEFAULT_GROUP
+        username: nacos               # 如果开启了鉴权
+        password: nacos
