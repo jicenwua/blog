@@ -73,19 +73,8 @@
 
         <el-form-item label="文章内容" prop="content" class="content-form-item">
           <div class="editor-container">
-            <Toolbar
-                style="border-bottom: 1px solid #ccc"
-                :editor="editorRef"
-                :defaultConfig="toolbarConfig"
-                mode="default"
-            />
-            <Editor
-                style="flex: 1; overflow-y: auto;"
-                v-model="articleForm.content"
-                :defaultConfig="editorConfig"
-                mode="default"
-                @onCreated="handleCreated"
-            />
+            <div ref="toolbarRef" style="border-bottom: 1px solid #ccc"></div>
+            <div ref="editorRef" style="flex: 1; overflow-y: auto;"></div>
           </div>
         </el-form-item>
       </el-form>
@@ -102,11 +91,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeUnmount, shallowRef, onMounted } from 'vue'
+import { ref, reactive, onBeforeUnmount, shallowRef, onMounted, nextTick } from 'vue'
 import { Edit, ArrowLeft } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import '@wangeditor/editor/dist/css/style.css'
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { createEditor, createToolbar } from '@wangeditor/editor'
 import { publishArticle, getArticleById, updateArticle } from '@/api/article'
 import { useRouter, useRoute } from 'vue-router'
 import { compressImage, blobToFile, formatFileSize } from '@/utils/imageCompress'
@@ -283,6 +272,25 @@ const handleCreated = (editor) => {
         }
       }
     }
+  })
+}
+
+// 初始化编辑器
+const initEditor = () => {
+  // 创建编辑器实例
+  editorInstance = createEditor({
+    selector: editorRef.value,
+    content: articleForm.content,
+    config: editorConfig,
+    mode: 'default'
+  })
+
+  // 创建工具栏实例
+  toolbarInstance = createToolbar({
+    editor: editorInstance,
+    selector: toolbarRef.value,
+    config: toolbarConfig,
+    mode: 'default'
   })
 }
 

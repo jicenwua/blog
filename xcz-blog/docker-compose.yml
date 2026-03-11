@@ -8,7 +8,7 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    command: redis-server --requirepass 594088
+    command: redis-server --requirepass 你的密码
     volumes:
       - "E:/Code/docker/redis/data:/data"
     networks:
@@ -21,6 +21,11 @@ services:
     restart: always
     ports:
       - "27017:27017"
+    environment:
+      # 设置初始 root 用户名
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      # 设置初始 root 密码
+      - MONGO_INITDB_ROOT_PASSWORD=你的密码
     volumes:
       - "E:/Code/docker/mongo/db:/data/db"
     networks:
@@ -44,18 +49,36 @@ services:
       - app-network
 
   # --- Nacos ---
-  nacos-mysql:
+  nacos:
     image: nacos/nacos-server:latest
-    container_name: nacos-mysql
+    container_name: nacos
     restart: always
-    environment:
-      - MODE=standalone
     ports:
       - "18080:8080"
+      - "8848:8848"
       - "9848:9848"
+    environment:
+      - MODE=standalone
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      # ！！！注意：这里指向宿主机 IP
+      - MYSQL_SERVICE_HOST=host.docker.internal
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_DB_NAME=nacos_config
+      - MYSQL_SERVICE_USER=nacos_config
+      - MYSQL_SERVICE_PASSWORD=你的密码
+      - NACOS_AUTH_ENABLE=true
+      - NACOS_AUTH_TOKEN=YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=
+      - NACOS_AUTH_IDENTITY_KEY=nacos
+      - NACOS_AUTH_IDENTITY_VALUE=你的密码
+      # 限制内存占用
+      - JVM_XMS=512m
+      - JVM_XMX=512m
     volumes:
-      - "E:/Code/docker/nacos/logs:/home/nacos/logs"
-      - "E:/Code/docker/nacos/conf:/home/nacos/conf"
+      - "/www/wwwroot/docker/nacos/conf:/home/nacos/conf"
+      - "/www/wwwroot/docker/nacos/logs:/home/nacos/logs"
+      - "/www/wwwroot/docker/nacos/data:/home/nacos/data"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - app-network
 

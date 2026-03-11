@@ -152,8 +152,7 @@ import {
   Trophy,
   Message,
   Check,
-  Star,
-  Github
+  Star
 } from '@element-plus/icons-vue'
 
 const searchQuery = ref('')
@@ -460,38 +459,38 @@ const isLoggedIn = ref(false)
   .search-section {
     width: 200px;
   }
-  
+
   .auth-section {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-left: 20px;
   }
-  
+
   .auth-btn {
     font-size: 14px;
     padding: 8px 16px;
     color: #409EFF;
   }
-  
+
   .auth-btn:hover {
     color: #66b1ff;
   }
-  
+
   /* 管理员标识 */
   .admin-badge {
     display: flex;
     align-items: center;
     margin-left: 20px;
   }
-  
+
   /* 用户信息下拉 */
   .user-section {
     display: flex;
     align-items: center;
     margin-left: 20px;
   }
-  
+
   .user-info {
     display: flex;
     align-items: center;
@@ -500,7 +499,7 @@ const isLoggedIn = ref(false)
     border-radius: 20px;
     background: #f5f7fa;
   }
-  
+
   .user-name {
     font-size: 14px;
     color: #606266;
