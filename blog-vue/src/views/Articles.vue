@@ -104,6 +104,7 @@ import { Clock, View, ChatDotRound, Star, DataAnalysis } from '@element-plus/ico
 import request from '@/utils/request'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { getRotatingImage } from '@/utils/defaultImages'
 
 const router = useRouter()
 const currentCategory = ref('') // 默认为空表示全部分类
@@ -147,11 +148,11 @@ const loadArticles = async () => {
     if (response.code === 200 && response.data) {
       // 后端返回的是 Page 对象
       const pageData = response.data
-      articles.value = pageData.content.map(article => ({
+      articles.value = pageData.content.map((article, index) => ({
         id: article.id,
         title: article.title,
         excerpt: article.content?.substring(0, 100) + '...' || '',
-        image: 'https://picsum.photos/400/250', // 临时使用默认图片
+        image: getRotatingImage(), // 轮询获取图片
         date: formatArticleDate(article.createTime),
         views: article.viewCount || 0,
         comments: article.commentCount || 0,

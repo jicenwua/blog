@@ -49,9 +49,9 @@
 
             <!-- 分页 -->
             <div class="pagination">
-              <el-pagination 
-                layout="prev, pager, next" 
-                :total="total" 
+              <el-pagination
+                layout="prev, pager, next"
+                :total="total"
                 :page-size="pageSize"
                 :current-page="currentPage"
                 @current-change="handlePageChange"
@@ -135,6 +135,7 @@ import {
 import { getArticleList } from '@/api/article'
 import { ElMessage } from 'element-plus'
 import { getUserInfo, isLoggedIn as checkLoggedIn, hasRole, logout as userLogout } from '@/utils/auth'
+import { getRotatingImage } from '@/utils/defaultImages'
 
 const searchQuery = ref('')
 let countdownInterval = null
@@ -218,10 +219,10 @@ onMounted(() => {
   countdownInterval = setInterval(() => {
     calculateCountdown() // 每秒更新
   }, 1000)
-  
+
   // 加载文章列表
   loadArticles()
-  
+
   // 检查登录状态
   checkLoginStatus()
 })
@@ -247,24 +248,24 @@ const loadArticles = async () => {
       page: currentPage.value - 1, // 后端从 0 开始
       size: pageSize.value
     })
-    
+
     if (res.code === 200 && res.data) {
       // 后端返回的是 Page 对象，需要提取 content
       const pageData = res.data
       const articlesList = pageData.content || pageData || []
-      
+
       // 按观看数量降序排序
-      articles.value = articlesList.map(article => ({
+      articles.value = articlesList.map((article, index) => ({
         id: article.id,
         title: article.title,
         excerpt: article.content?.substring(0, 100) + '...' || '',
-        image: 'https://picsum.photos/400/250', // 临时使用默认图片
+        image: getRotatingImage(), // 轮询获取图片
         date: formatArticleDate(article.createTime),
         views: article.viewCount || 0,
         comments: article.commentCount || 0,
         tags: article.tags || []
       })).sort((a, b) => b.views - a.views)
-      
+
       // 计算总数
       total.value = pageData.totalElements || pageData.total || articlesList.length
     }
