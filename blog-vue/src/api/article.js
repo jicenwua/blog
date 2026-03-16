@@ -55,6 +55,42 @@ export function likeArticle(id) {
 }
 
 /**
+ * 检查用户是否已点赞文章
+ * @param {string} id - 文章 ID
+ * @returns {Promise}
+ */
+export function checkArticleLiked(id) {
+ return request({
+   url: `/article/liked/${id}`,
+   method: 'get'
+  })
+}
+
+/**
+ * 点赞评论
+ * @param {string} commentId - 评论 ID
+ * @returns {Promise}
+ */
+export function likeComment(commentId) {
+ return request({
+   url: `/article/comment/${commentId}/like`,
+   method: 'post'
+  })
+}
+
+/**
+ * 检查用户是否已点赞评论
+ * @param {string} commentId - 评论 ID
+ * @returns {Promise}
+ */
+export function checkCommentLiked(commentId) {
+ return request({
+   url: `/article/comment/${commentId}/liked`,
+   method: 'get'
+  })
+}
+
+/**
  * 增加浏览次数
  * @param {string} id - 文章 ID
  * @returns {Promise}

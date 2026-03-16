@@ -79,15 +79,47 @@ public class CommentController {
     }
 
     /**
-     * 点赞评论
+     * 点赞评论（切换点赞状态）
      */
     @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<Void> likeComment(@PathVariable String commentId) {
         try {
-            commentService.likeComment(commentId);
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            Long userId = loginUser.getUserId();
+            
+            // 检查是否已点赞
+            if (commentService.hasLiked(commentId, userId)) {
+                // 取消点赞
+                commentService.decrementLikeCount(commentId, userId);
+            } else {
+                // 增加点赞
+                commentService.incrementLikeCount(commentId, userId);
+            }
+            
             return ResponseEntityUtils.ok();
         } catch (Exception e) {
             return ResponseEntityUtils.fail("点赞失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 检查用户是否已点赞评论
+     */
+    @GetMapping("/comment/{commentId}/liked")
+    public ResponseEntity<Boolean> checkCommentLiked(@PathVariable String commentId) {
+        try {
+            Long userId = null;
+            try {
+                LoginUser loginUser = SecurityUtils.getLoginUser();
+                userId = loginUser.getUserId();
+            } catch (Exception e) {
+                // 未登录
+            }
+
+            boolean liked = commentService.hasLiked(commentId, userId);
+            return ResponseEntityUtils.ok(liked);
+        } catch (Exception e) {
+            return ResponseEntityUtils.fail("查询失败：" + e.getMessage());
         }
     }
 

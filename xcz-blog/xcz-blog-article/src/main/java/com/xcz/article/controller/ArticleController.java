@@ -234,14 +234,14 @@ public class ArticleController {
             Article article = articleService.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("文章不存在"));
 
-            // ⭐ 删除该文章的所有图片
+            // 删除该文章的所有图片
             try {
                 imageService.deleteImagesByArticleId(id);
             } catch (Exception e) {
                 log.warn("删除文章 {} 的图片时失败：{}", id, e.getMessage());
             }
 
-            // ⭐ 删除该文章的所有评论
+            // 删除该文章的所有评论
             try {
                 commentService.deleteCommentsByArticleId(id);
             } catch (Exception e) {

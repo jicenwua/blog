@@ -38,10 +38,33 @@ public interface CommentService {
     java.util.List<CommentResponse> getCommentReplies(String parentCommentId);
 
     /**
-     * 点赞评论
+     * 点赞评论（切换点赞状态）
      * @param commentId 评论 ID
+     * @param userId 用户 ID
      */
-    void likeComment(String commentId);
+    void likeComment(String commentId, Long userId);
+
+    /**
+     * 检查用户是否已点赞评论
+     * @param commentId 评论 ID
+     * @param userId 用户 ID
+     * @return true-已点赞，false-未点赞
+     */
+    boolean hasLiked(String commentId, Long userId);
+
+    /**
+     * 增加评论点赞数
+     * @param commentId 评论 ID
+     * @param userId 用户 ID
+     */
+    void incrementLikeCount(String commentId, Long userId);
+
+    /**
+     * 取消评论点赞
+     * @param commentId 评论 ID
+     * @param userId 用户 ID
+     */
+    void decrementLikeCount(String commentId, Long userId);
 
     /**
      * 删除评论

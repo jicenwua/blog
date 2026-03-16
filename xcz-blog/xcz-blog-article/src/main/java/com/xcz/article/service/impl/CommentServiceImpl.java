@@ -7,6 +7,7 @@ import com.xcz.article.entity.Comment;
 import com.xcz.article.repository.ArticleRepository;
 import com.xcz.article.repository.CommentRepository;
 import com.xcz.article.service.CommentService;
+import com.xcz.article.service.CommentStatsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final ArticleRepository articleRepository;
     private final MongoTemplate mongoTemplate;
+    private final CommentStatsService commentStatsService;
 
     /**
      * 评论类型常量
@@ -62,6 +64,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setCommentType(request.getParentCommentId() != null ? COMMENT_TYPE_FLOOR : COMMENT_TYPE_ARTICLE);
         comment.setArticleId(request.getArticleId());
         comment.setParentCommentId(request.getParentCommentId());
+        comment.setParentUserName(request.getParentUserName());
         comment.setUserId(userId);
         comment.setUserNickname(userNickname);
         comment.setUserAvatar(userAvatar);
@@ -112,10 +115,30 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void likeComment(String commentId) {
-        Query query = new Query(Criteria.where("_id").is(commentId));
-        Update update = new Update().inc("like_count", 1);
-        mongoTemplate.updateFirst(query, update, Comment.class);
+    public void likeComment(String commentId, Long userId) {
+        // 检查是否已点赞
+        if (commentStatsService.hasLiked(commentId, userId)) {
+            // 取消点赞
+            commentStatsService.decrementLikeCount(commentId, userId);
+        } else {
+            // 增加点赞
+            commentStatsService.incrementLikeCount(commentId, userId);
+        }
+    }
+
+    @Override
+    public boolean hasLiked(String commentId, Long userId) {
+        return commentStatsService.hasLiked(commentId, userId);
+    }
+
+    @Override
+    public void incrementLikeCount(String commentId, Long userId) {
+        commentStatsService.incrementLikeCount(commentId, userId);
+    }
+
+    @Override
+    public void decrementLikeCount(String commentId, Long userId) {
+        commentStatsService.decrementLikeCount(commentId, userId);
     }
 
     @Override
@@ -152,7 +175,7 @@ public class CommentServiceImpl implements CommentService {
         // 分页查询所有评论（按创建时间倒序）
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createTime"));
         Page<Comment> commentPage = commentRepository.findAllByOrderByCreateTimeDesc(pageable);
-        
+
         // 转换为响应对象
         return commentPage.map(this::convertToResponse);
     }
@@ -192,6 +215,7 @@ public class CommentServiceImpl implements CommentService {
         response.setContent(comment.getContent());
         response.setLikeCount(comment.getLikeCount());
         response.setReplyCount(comment.getReplyCount());
+        response.setParentUserName(comment.getParentUserName());
         response.setCreateTime(comment.getCreateTime());
         return response;
     }

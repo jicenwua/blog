@@ -21,6 +21,11 @@ public class CommentRequest {
     private String parentCommentId;
 
     /**
+     * 被回复用户的昵称 (如果是回复评论则必填)
+     */
+    private String parentUserName;
+
+    /**
      * 评论内容
      */
     private String content;

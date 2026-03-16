@@ -54,6 +54,11 @@ public class CommentResponse {
     private Long replyCount;
 
     /**
+     * 被回复用户的昵称 (仅楼层评论包含)
+     */
+    private String parentUserName;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

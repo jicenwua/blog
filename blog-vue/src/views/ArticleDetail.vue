@@ -152,19 +152,43 @@
                   </div>
                   <div class="comment-text">{{ comment.content }}</div>
                   <div class="comment-actions">
-                    <el-button text size="small" @click="handleReply(comment)">
+                    <el-button text size="small" @click="toggleReplyInput(comment)">
                       <el-icon><ChatLineRound /></el-icon>
                       回复
                     </el-button>
-                    <el-button text size="small" @click="handleLikeComment(comment)">
+                    <el-button 
+                      text 
+                      size="small" 
+                      @click="handleLikeComment(comment)"
+                      :class="{ 'liked': commentLikes[comment.id] }"
+                    >
                       <el-icon><Star /></el-icon>
                       {{ comment.likeCount || 0 }}
                     </el-button>
                   </div>
-
+            
+                  <!-- 回复输入框 -->
+                  <div v-if="comment.showReplyInput" class="reply-input-container">
+                    <el-input
+                      v-model="comment.replyContent"
+                      type="textarea"
+                      :rows="3"
+                      placeholder="写下你的回复..."
+                      maxlength="500"
+                      show-word-limit
+                      class="reply-input"
+                    />
+                    <div class="reply-input-actions">
+                      <el-button size="small" @click="cancelReply(comment)">取消</el-button>
+                      <el-button type="primary" size="small" @click="submitReply(comment)" :loading="comment.submitting">
+                        发表回复
+                      </el-button>
+                    </div>
+                  </div>
+            
                   <!-- 回复列表 -->
                   <div v-if="comment.replies && comment.replies.length > 0" class="replies-list">
-                    <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
+                    <div v-for="reply in getVisibleReplies(comment)" :key="reply.id" class="reply-item">
                       <div class="reply-avatar">
                         <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png">
                         </el-avatar>
@@ -175,16 +199,42 @@
                           <span class="reply-time">{{ formatTime(reply.createTime) }}</span>
                         </div>
                         <div class="reply-text">
-                          <span v-if="reply.parentUserName" class="reply-to">@{{ reply.parentUserName }}：</span>
+                          <span v-if="reply.parentUserName" class="reply-to">@{{ reply.parentUserName }}:</span>
                           {{ reply.content }}
                         </div>
                         <div class="reply-actions">
-                          <el-button text size="small" @click="handleReply(reply)">
+                          <el-button text size="small" @click="toggleReplyInput(reply, comment)">
                             <el-icon><ChatLineRound /></el-icon>
                             回复
                           </el-button>
                         </div>
+                        
+                        <!-- 楼层回复输入框 -->
+                        <div v-if="reply.showReplyInput" class="reply-input-container">
+                          <el-input
+                            v-model="reply.replyContent"
+                            type="textarea"
+                            :rows="3"
+                            placeholder="写下你的回复..."
+                            maxlength="500"
+                            show-word-limit
+                            class="reply-input"
+                          />
+                          <div class="reply-input-actions">
+                            <el-button size="small" @click="cancelReply(reply)">取消</el-button>
+                            <el-button type="primary" size="small" @click="submitReplyToReply(reply, comment)" :loading="reply.submitting">
+                              发表回复
+                            </el-button>
+                          </div>
+                        </div>
                       </div>
+                    </div>
+                                
+                    <!-- 更多回复按钮 -->
+                    <div v-if="shouldShowMoreReplies(comment)" class="show-more-container">
+                      <el-button text size="small" @click="loadMoreReplies(comment)">
+                        加载更多回复 (还剩 {{ comment.totalReplies - comment.visibleReplies }} 条)
+                      </el-button>
                     </div>
                   </div>
                 </div>
@@ -217,8 +267,8 @@ import {
 import { getUserInfo, isLoggedIn as checkLoggedIn, hasRole } from '@/utils/auth'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
+import {likeArticle, likeComment, checkCommentLiked} from "@/api/article.js";
 
 const route = useRoute()
 const router = useRouter()
@@ -233,6 +283,8 @@ const isAdmin = ref(false)
 const comments = ref([])
 const commentFormRef = ref(null)
 const submitting = ref(false)
+const commentLikes = ref({}) // 存储每条评论的点赞状态
+const REPLY_PAGE_SIZE = 10 // 每页显示的回复数量
 const commentForm = reactive({
   content: '',
   parentId: null,
@@ -283,6 +335,11 @@ const loadArticle = async () => {
 
       // 加载评论
       await loadComments()
+      
+      // 检查评论点赞状态
+      if (isLoggedIn.value) {
+        await loadCommentLikeStatus()
+      }
     } else {
       ElMessage.error('文章不存在')
     }
@@ -301,7 +358,7 @@ const checkHasLiked = async () => {
  if (!isLoggedIn.value) {
  return
  }
- 
+
  try {
    const response = await request({
    url: `/article/liked/${route.params.id}`,
@@ -313,6 +370,29 @@ const checkHasLiked = async () => {
    }
   } catch(error) {
    console.error('检查点赞状态失败:', error)
+  }
+}
+
+// 加载评论点赞状态
+const loadCommentLikeStatus = async () => {
+  if (!isLoggedIn.value) {
+    return
+  }
+  
+  try {
+    // 为每条评论检查点赞状态
+    for (const comment of comments.value) {
+      try {
+        const response = await checkCommentLiked(comment.id)
+        if (response.code === 200 && response.data) {
+          commentLikes.value[comment.id] = response.data
+        }
+      } catch (error) {
+        console.error(`检查评论 ${comment.id} 点赞状态失败:`, error)
+      }
+    }
+  } catch (error) {
+    console.error('加载评论点赞状态失败:', error)
   }
 }
 
@@ -330,7 +410,23 @@ const loadComments = async () => {
 
     if (response.code === 200 && response.data) {
       // 后端返回的是 Page 对象，需要取 content
-      comments.value = response.data.content || response.data || []
+      const loadedComments = response.data.content || response.data || []
+      // 为每条评论添加额外的 UI 状态
+      comments.value = loadedComments.map(comment => ({
+        ...comment,
+        showReplyInput: false,
+        replyContent: '',
+        submitting: false,
+        visibleReplies: REPLY_PAGE_SIZE, // 当前显示的回复数量
+        totalReplies: comment.replies ? comment.replies.length : 0, // 总回复数
+        // 为每个回复也添加 UI 状态
+        replies: (comment.replies || []).map(reply => ({
+          ...reply,
+          showReplyInput: false,
+          replyContent: '',
+          submitting: false
+        }))
+      }))
     }
   } catch (error) {
     console.error('加载评论失败:', error)
@@ -363,6 +459,8 @@ const submitComment = async () => {
 
         if (response.code === 200) {
           ElMessage.success('评论成功')
+          // 等待一下再重新加载评论，确保后端数据已更新
+          await new Promise(resolve => setTimeout(resolve, 300))
           // 重新加载评论
           await loadComments()
           // 重置表单
@@ -387,16 +485,135 @@ const resetForm = () => {
   commentForm.parentUserName = null
 }
 
-// 回复评论
-const handleReply = (comment) => {
+// 切换回复输入框显示
+const toggleReplyInput = (targetComment, parentComment = null) => {
   if (!isLoggedIn.value) {
     ElMessage.warning('请先登录')
     return
   }
-  commentForm.parentId = comment.id
-  commentForm.parentUserName = comment.userName
-  // 滚动到表单
-  document.querySelector('.comment-form-card')?.scrollIntoView({ behavior: 'smooth' })
+  
+  // 如果是回复某个回复 (盖楼),使用父评论的 ID
+  const commentToToggle = parentComment || targetComment
+  
+  // 关闭其他所有回复输入框
+  comments.value.forEach(c => {
+    c.showReplyInput = false
+    if (c.replies) {
+      c.replies.forEach(r => {
+        r.showReplyInput = false
+      })
+    }
+  })
+  
+  // 切换当前回复输入框
+  if (parentComment) {
+    // 回复的是子评论
+    const reply = parentComment.replies.find(r => r.id === targetComment.id)
+    if (reply) {
+      reply.showReplyInput = !reply.showReplyInput
+      if (reply.showReplyInput) {
+        reply.replyToUserName = targetComment.userNickname
+        reply.parentCommentId = parentComment.id
+      }
+    }
+  } else {
+    // 回复的是一级评论
+    targetComment.showReplyInput = !targetComment.showReplyInput
+  }
+}
+
+// 取消回复
+const cancelReply = (comment) => {
+  comment.showReplyInput = false
+  comment.replyContent = ''
+}
+
+// 提交回复
+const submitReply = async (comment) => {
+  if (!comment.replyContent || !comment.replyContent.trim()) {
+    ElMessage.warning('请输入回复内容')
+    return
+  }
+  
+  comment.submitting = true
+  try {
+    const response = await request({
+      url: '/article/add',
+      method: 'post',
+      data: {
+        articleId: route.params.id,
+        content: comment.replyContent.trim(),
+        parentCommentId: comment.parentCommentId || comment.id,
+        parentUserName: comment.replyToUserName || comment.userNickname
+      }
+    })
+
+    if (response.code === 200) {
+      ElMessage.success('回复成功')
+      // 等待一下再重新加载评论，确保后端数据已更新
+      await new Promise(resolve => setTimeout(resolve, 300))
+      // 重新加载评论
+      await loadComments()
+    }
+  } catch (error) {
+    console.error('回复失败:', error)
+    ElMessage.error('回复失败')
+  } finally {
+    comment.submitting = false
+  }
+}
+
+// 提交楼层回复 (回复评论的评论)
+const submitReplyToReply = async (reply, parentComment) => {
+  if (!reply.replyContent || !reply.replyContent.trim()) {
+    ElMessage.warning('请输入回复内容')
+    return
+  }
+  
+  reply.submitting = true
+  try {
+    const response = await request({
+      url: '/article/add',
+      method: 'post',
+      data: {
+        articleId: route.params.id,
+        content: reply.replyContent.trim(),
+        parentCommentId: parentComment.id,
+        parentUserName: reply.userNickname
+      }
+    })
+
+    if (response.code === 200) {
+      ElMessage.success('回复成功')
+      // 等待一下再重新加载评论，确保后端数据已更新
+      await new Promise(resolve => setTimeout(resolve, 300))
+      // 重新加载评论
+      await loadComments()
+    }
+  } catch (error) {
+    console.error('回复失败:', error)
+    ElMessage.error('回复失败')
+  } finally {
+    reply.submitting = false
+  }
+}
+
+// 获取可见的回复列表 (分页)
+const getVisibleReplies = (comment) => {
+  if (!comment.replies || comment.replies.length === 0) return []
+  const visibleCount = comment.visibleReplies || REPLY_PAGE_SIZE
+  return comment.replies.slice(0, visibleCount)
+}
+
+// 是否显示"更多回复"按钮
+const shouldShowMoreReplies = (comment) => {
+  if (!comment.replies) return false
+  return comment.replies.length > (comment.visibleReplies || REPLY_PAGE_SIZE)
+}
+
+// 加载更多回复
+const loadMoreReplies = (comment) => {
+  comment.visibleReplies = (comment.visibleReplies || REPLY_PAGE_SIZE) + REPLY_PAGE_SIZE
 }
 
 // 点赞评论
@@ -407,14 +624,22 @@ const handleLikeComment = async (comment) => {
   }
 
   try {
-    const response = await request({
-      url: `/article/comment/${comment.id}/like`,
-      method: 'post'
-    })
+    const response = await likeComment(comment.id)
 
     if (response.code === 200) {
-      ElMessage.success('点赞成功')
-      comment.likeCount = (comment.likeCount || 0) + 1
+      // 切换点赞状态
+      const wasLiked = commentLikes.value[comment.id] || false
+      commentLikes.value[comment.id] = !wasLiked
+      
+      if (!wasLiked) {
+        // 点赞成功
+        comment.likeCount = (comment.likeCount || 0) + 1
+        ElMessage.success('点赞成功')
+      } else {
+        // 取消点赞
+        comment.likeCount = Math.max(0, (comment.likeCount || 0) - 1)
+        ElMessage.info('已取消点赞')
+      }
     }
   } catch (error) {
     console.error('点赞评论失败:', error)
@@ -431,10 +656,7 @@ const handleLike = async () => {
 
   liking.value = true
   try {
-    const response = await request({
-      url: `/article/${route.params.id}/like`,
-      method: 'post'
-    })
+    const response = await likeArticle(route.params.id)
 
     if (response.code === 200) {
       // 切换点赞状态
@@ -938,6 +1160,15 @@ onMounted(() => {
   gap: 10px;
 }
 
+/* 评论点赞按钮的点赞状态 */
+.comment-actions .liked {
+  color: #ff6b6b;
+}
+
+.comment-actions .liked .el-icon {
+  color: #ff6b6b;
+}
+
 /* 回复列表 */
 .replies-list {
   margin-top: 15px;
@@ -1018,6 +1249,31 @@ onMounted(() => {
 
 .comment-form :deep(.el-textarea__inner) {
   border-radius: 8px;
+}
+
+/* 回复输入框样式 */
+.reply-input-container {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.reply-input {
+  margin-bottom: 8px;
+}
+
+.reply-input-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.show-more-container {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e4e7ed;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

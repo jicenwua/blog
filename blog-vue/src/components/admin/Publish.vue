@@ -73,8 +73,19 @@
 
         <el-form-item label="文章内容" prop="content" class="content-form-item">
           <div class="editor-container">
-            <div ref="toolbarRef" style="border-bottom: 1px solid #ccc"></div>
-            <div ref="editorRef" style="flex: 1; overflow-y: auto;"></div>
+            <Toolbar
+                style="border-bottom: 1px solid #ccc"
+                :editor="editorRef"
+                :defaultConfig="toolbarConfig"
+                mode="default"
+            />
+            <Editor
+                style="flex: 1; overflow-y: auto;"
+                v-model="articleForm.content"
+                :defaultConfig="editorConfig"
+                mode="default"
+                @onCreated="handleCreated"
+            />
           </div>
         </el-form-item>
       </el-form>
@@ -91,11 +102,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeUnmount, shallowRef, onMounted, nextTick } from 'vue'
+import { ref, reactive, onBeforeUnmount, shallowRef, onMounted } from 'vue'
 import { Edit, ArrowLeft } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import '@wangeditor/editor/dist/css/style.css'
-import { createEditor, createToolbar } from '@wangeditor/editor'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import { publishArticle, getArticleById, updateArticle } from '@/api/article'
 import { useRouter, useRoute } from 'vue-router'
 import { compressImage, blobToFile, formatFileSize } from '@/utils/imageCompress'
@@ -275,33 +286,14 @@ const handleCreated = (editor) => {
   })
 }
 
-// 初始化编辑器
-const initEditor = () => {
-  // 创建编辑器实例
-  editorInstance = createEditor({
-    selector: editorRef.value,
-    content: articleForm.content,
-    config: editorConfig,
-    mode: 'default'
-  })
-
-  // 创建工具栏实例
-  toolbarInstance = createToolbar({
-    editor: editorInstance,
-    selector: toolbarRef.value,
-    config: toolbarConfig,
-    mode: 'default'
-  })
-}
-
 // 清理粘贴的 HTML，移除可能导致序号冲突的内容
 const cleanPasteHtml = (html) => {
   if (!html) return ''
-  
+
   // 创建临时 DOM 元素
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = html
-  
+
   // 移除所有有序列表的自动编号样式
   const elements = tempDiv.querySelectorAll('*')
   elements.forEach(el => {
@@ -317,7 +309,7 @@ const cleanPasteHtml = (html) => {
       classesToRemove.forEach(cls => el.classList.remove(cls))
     }
   })
-  
+
   return tempDiv.innerHTML
 }
 
@@ -330,7 +322,7 @@ const insertCleanHtml = (editor, html) => {
       // 将 HTML 转换为文本节点插入，避免重新解析序号
       const tempDiv = document.createElement('div')
       tempDiv.innerHTML = html
-      
+
       // 逐个子节点插入，保持样式但避免序号冲突
       const nodes = Array.from(tempDiv.childNodes)
       nodes.forEach(node => {

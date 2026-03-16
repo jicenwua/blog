@@ -45,6 +45,12 @@ public class Comment {
     private String parentCommentId;
 
     /**
+     * 被回复用户的昵称 (用于显示回复时的@对象)
+     */
+    @Field("parent_user_name")
+    private String parentUserName;
+
+    /**
      * 评论的用户 ID
      */
     @Field("user_id")
