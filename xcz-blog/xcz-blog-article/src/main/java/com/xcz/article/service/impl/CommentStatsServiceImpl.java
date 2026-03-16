@@ -87,7 +87,7 @@ public class CommentStatsServiceImpl implements CommentStatsService {
     /**
      * 定时任务：每 5 分钟同步一次 Redis 数据到 MongoDB
      */
-    @Scheduled(fixedRate = 300000) // 5 分钟
+    @Scheduled(fixedRate = 120000) // 2 分钟
     @Override
     public void syncToMongoDB() {
         log.info("开始同步评论统计数据到 MongoDB...");

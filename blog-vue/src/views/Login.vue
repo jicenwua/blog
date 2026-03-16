@@ -31,7 +31,6 @@
 
         <el-form-item>
           <el-checkbox v-model="loginForm.rememberMe">记住我</el-checkbox>
-          <router-link to="/forgot-password" class="forgot-password">忘记密码？</router-link>
         </el-form-item>
 
         <el-form-item>
@@ -100,11 +99,11 @@ const loginRules = {
 // 处理登录
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   await loginFormRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
-      
+
       try {
         // 调用后端登录接口
         const res = await login({
@@ -112,21 +111,21 @@ const handleLogin = async () => {
           userPassword: loginForm.userPassword,
           rememberMe: loginForm.rememberMe
         })
-        
+
         // 登录成功，保存 token 和用户信息
         if (res.data && res.data.token) {
           // 根据记住我选项决定存储方式
           setToken(res.data.token, loginForm.rememberMe)
-          
+
           // 保存用户信息（从登录表单获取）
           setUserInfo({
             userName: loginForm.userUsername.split('@')[0], // 如果是邮箱，取@前部分作为昵称
             userUsername: loginForm.userUsername,
             roles: res.data.permissions || [] // 保存权限列表（后端返回的是 permissions）
           })
-          
+
           ElMessage.success('登录成功')
-          
+
           // 跳转到首页
           setTimeout(() => {
             router.push('/')

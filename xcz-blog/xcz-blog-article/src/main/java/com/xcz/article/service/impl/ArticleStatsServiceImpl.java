@@ -94,7 +94,7 @@ public class ArticleStatsServiceImpl implements ArticleStatsService {
     /**
      * 定时任务：每 5 分钟同步一次 Redis 数据到 MongoDB
      */
-    @Scheduled(fixedRate = 300000) // 5 分钟
+    @Scheduled(fixedRate = 120000) // 5 分钟
     @Override
     public void syncToMongoDB() {
         log.info("开始同步文章统计数据到 MongoDB...");
@@ -116,7 +116,7 @@ public class ArticleStatsServiceImpl implements ArticleStatsService {
     public void syncViewCounts() {
         RKeys rKeys = redisson.getKeys();
         Iterable<String> keys = rKeys.getKeysByPattern(VIEW_COUNT_PREFIX + "*");
-
+        log.info("浏览量keys：{}", keys);
         BulkOperations bulkOps = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, Article.class);
         boolean hasData = false;
 
@@ -125,11 +125,12 @@ public class ArticleStatsServiceImpl implements ArticleStatsService {
                 String articleId = key.replace(VIEW_COUNT_PREFIX, "");
                 RSet<Object> setCache = redisson.getSet(key);
                 long count = setCache.size();
+                log.info("更新：{}，浏览量：{}", articleId, count);
 
                 if (count >= 0) {
-                    // 更新 MongoDB
+                    // 更新 MongoDB - 在原有基础上累加
                     Query query = new Query(Criteria.where("_id").is(articleId));
-                    Update update = new Update().set("viewCount", count);
+                    Update update = new Update().inc("viewCount", count);
                     bulkOps.updateOne(query, update);
                     hasData = true;
                     setCache.clear();
@@ -163,7 +164,7 @@ public class ArticleStatsServiceImpl implements ArticleStatsService {
 
                 if (count >= 0) {
                     Query query = new Query(Criteria.where("_id").is(articleId));
-                    Update update = new Update().set("likeCount", count);
+                    Update update = new Update().inc("likeCount", count);
                     bulkOps.updateOne(query, update);
                     hasData = true;
                     rSet.clear();
